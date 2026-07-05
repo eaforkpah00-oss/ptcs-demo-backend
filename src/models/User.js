@@ -16,6 +16,9 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  // Only populated when role === 'teacher'
+  staffProfileId: { type: mongoose.Schema.Types.ObjectId, ref: 'StaffProfile', default: null },
+  subjectsTaught: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }],
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {

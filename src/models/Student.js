@@ -14,6 +14,10 @@ const studentSchema = new mongoose.Schema({
   house: { type: mongoose.Schema.Types.ObjectId, ref: 'House' },
   boardingStatus: { type: String, enum: ['day', 'boarding'], default: 'day' },
   roomNumber: String,
+  medicalNotes: { type: String, default: null },
+  admissionNumber: { type: String, default: null },
+  houseColor: { type: String, default: null },
+  libraryCardNo: { type: String, default: null },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Student', studentSchema);
