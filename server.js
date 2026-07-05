@@ -212,6 +212,10 @@ const startServer = async () => {
   }
 };
 
-startServer();
+// Skip auto-connect/listen under Jest — tests import `app` and manage their own
+// in-memory DB connection/lifecycle (see backend/tests/setup.js).
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 module.exports = app;

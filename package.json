@@ -7,10 +7,13 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed": "node seeds/seedTestData.js",
-    "seed:superadmin": "node seeds/createSuperAdmin.js"
+    "seed:superadmin": "node seeds/createSuperAdmin.js",
+    "test": "jest --runInBand"
   },
   "dependencies": {
+    "axios": "^1.18.1",
     "bcryptjs": "^2.4.3",
+    "bullmq": "^5.79.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "csv-parse": "^6.2.1",
@@ -19,13 +22,18 @@
     "express-rate-limit": "^6.7.0",
     "express-validator": "^7.0.1",
     "helmet": "^7.0.0",
+    "ioredis": "^5.11.1",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.3.1",
     "multer": "^1.4.5-lts.1",
+    "node-cron": "^4.5.0",
     "nodemailer": "^6.9.3",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "jest": "^30.4.2",
+    "nodemon": "^3.0.1",
+    "supertest": "^7.2.2"
   }
 }
