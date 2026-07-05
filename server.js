@@ -31,6 +31,7 @@ const platformRoutes = require('./src/routes/platformRoutes');
 const houseRoutes = require('./src/routes/houseRoutes');
 const welfareRoutes = require('./src/routes/welfareRoutes');
 const boardingAttendanceRoutes = require('./src/routes/boardingAttendanceRoutes');
+const feesRoutes = require('./src/modules/fees/fees.routes');
 
 // Ensure uploads directory exists
 const uploadPath = process.env.UPLOAD_PATH || 'uploads/';
@@ -148,6 +149,7 @@ app.use('/api/platform', platformRoutes);
 app.use('/api/houses', houseRoutes);
 app.use('/api/welfare', welfareRoutes);
 app.use('/api/boarding-attendance', boardingAttendanceRoutes);
+app.use('/api/v1/fees', feesRoutes);
 
 // ========================
 // 404 Handler

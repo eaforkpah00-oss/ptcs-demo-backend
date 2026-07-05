@@ -9,6 +9,9 @@ const TEST_DB_URI = process.env.TEST_MONGODB_URI || 'mongodb://127.0.0.1:27017/p
 
 beforeAll(async () => {
   await mongoose.connect(TEST_DB_URI);
+  // Index creation (e.g. unique constraints) happens async in the background —
+  // wait for it so uniqueness is actually enforced on a freshly created test DB.
+  await Promise.all(mongoose.modelNames().map((name) => mongoose.model(name).init()));
 });
 
 afterEach(async () => {

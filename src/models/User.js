@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema({
   // Only populated when role === 'teacher'
   staffProfileId: { type: mongoose.Schema.Types.ObjectId, ref: 'StaffProfile', default: null },
   subjectsTaught: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }],
+  notificationPreferences: {
+    channels: { type: [String], default: ['inApp'] },
+  },
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {
