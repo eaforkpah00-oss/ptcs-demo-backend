@@ -38,6 +38,7 @@ const libraryRoutes = require('./src/modules/library/library.routes');
 const calendarRoutes = require('./src/modules/calendar/calendar.routes');
 const hrRoutes = require('./src/modules/hr/hr.routes');
 const analyticsRoutes = require('./src/modules/analytics/analytics.routes');
+const parentPortalRoutes = require('./src/modules/parentPortal/parentPortal.routes');
 
 // Ensure uploads directory exists
 const uploadPath = process.env.UPLOAD_PATH || 'uploads/';
@@ -162,6 +163,7 @@ app.use('/api/v1/library', libraryRoutes);
 app.use('/api/v1/calendar', calendarRoutes);
 app.use('/api/v1/hr', hrRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
+app.use('/api/v1/parent', parentPortalRoutes);
 
 // ========================
 // 404 Handler
