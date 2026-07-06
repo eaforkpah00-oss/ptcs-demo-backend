@@ -50,7 +50,7 @@ exports.initializePaystackPayment = catchAsync(async (req, res) => {
 });
 
 exports.handlePaystackWebhook = catchAsync(async (req, res) => {
-  await feesService.handlePaystackFeeWebhook(req.body, req.headers['x-paystack-signature']);
+  await feesService.handlePaystackFeeWebhook(req.rawBody, req.body, req.headers['x-paystack-signature']);
   res.status(200).json({ status: 'success' });
 });
 

@@ -14,7 +14,7 @@ async function notifySchoolOfHoliday(schoolId, event) {
   await Promise.all(recipients.map((id) => sendNotification(
     id, 'calendar_holiday', `School Holiday: ${event.title}`,
     `${event.title} from ${event.startDate.toDateString()} to ${event.endDate.toDateString()}. School will be closed.`,
-    { schoolId, eventId: event._id }, ['inApp'],
+    { schoolId, eventId: event._id },
   )));
 }
 

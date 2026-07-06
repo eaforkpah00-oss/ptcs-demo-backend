@@ -117,7 +117,6 @@ async function generateInvoices(schoolId, termId, adminId) {
           'Fee Invoice Generated',
           `An invoice of GHS ${(structure.amount / 100).toFixed(2)} has been raised for ${student.firstName} ${student.lastName}. Due by ${invoice.dueDate.toDateString()}.`,
           { schoolId, invoiceId: invoice._id },
-          ['inApp'],
         );
       }
     }
@@ -174,7 +173,7 @@ async function recordPayment(schoolId, invoiceId, paymentData, adminId) {
     : `Payment of GHS ${(paymentData.amount / 100).toFixed(2)} received. Remaining balance: GHS ${(balance / 100).toFixed(2)}.`;
 
   for (const parentId of student.parents || []) {
-    await sendNotification(parentId, 'fee_paid', 'Fee Payment Received', body, { schoolId, invoiceId: invoice._id }, ['inApp']);
+    await sendNotification(parentId, 'fee_paid', 'Fee Payment Received', body, { schoolId, invoiceId: invoice._id });
   }
 
   await AuditLog.record({
@@ -218,8 +217,8 @@ async function initializePaystackPayment(schoolId, invoiceId, parentId) {
   return { authorizationUrl: response.data.data.authorization_url, reference };
 }
 
-async function handlePaystackFeeWebhook(payload, signature) {
-  const hash = crypto.createHmac('sha512', process.env.PAYSTACK_SECRET_KEY).update(JSON.stringify(payload)).digest('hex');
+async function handlePaystackFeeWebhook(rawBody, payload, signature) {
+  const hash = crypto.createHmac('sha512', process.env.PAYSTACK_SECRET_KEY).update(rawBody).digest('hex');
   if (hash !== signature) throw new AppError('Invalid Paystack signature.', 401);
 
   const { event, data } = payload;
@@ -357,7 +356,6 @@ async function sendPaymentReminders(schoolId) {
         'Fee Payment Reminder',
         `${student.firstName} ${student.lastName}'s fee balance of GHS ${(balance / 100).toFixed(2)} is due soon.`,
         { schoolId, invoiceId: invoice._id },
-        ['inApp'],
       );
       remindersSent += 1;
     }

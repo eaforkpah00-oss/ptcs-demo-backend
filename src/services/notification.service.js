@@ -73,8 +73,12 @@ if (queue) {
 /**
  * Every module that needs to alert a user must call this instead of building
  * its own SMS/email/WhatsApp/push logic (Rule 2 of the SMS merger build).
+ *
+ * Pass `channels` to force specific channels regardless of the recipient's
+ * preference (e.g. an urgent alert that must always reach email too). Omit it
+ * to honor the recipient's own `notificationPreferences.channels` instead.
  */
-async function sendNotification(recipientId, type, title, body, data = {}, channels = ['inApp']) {
+async function sendNotification(recipientId, type, title, body, data = {}, channels = null) {
   await Notification.create({
     recipient: recipientId,
     school: data.schoolId || data.school || null,
@@ -84,7 +88,15 @@ async function sendNotification(recipientId, type, title, body, data = {}, chann
     data,
   });
 
-  const externalChannels = channels.filter((c) => c !== 'inApp');
+  let effectiveChannels = channels;
+  if (!effectiveChannels) {
+    const recipient = await User.findById(recipientId).select('notificationPreferences');
+    effectiveChannels = recipient?.notificationPreferences?.channels?.length
+      ? recipient.notificationPreferences.channels
+      : ['inApp'];
+  }
+
+  const externalChannels = effectiveChannels.filter((c) => c !== 'inApp');
   if (externalChannels.length === 0) return;
 
   const payload = { recipientId, type, title, body, data, channels: externalChannels };

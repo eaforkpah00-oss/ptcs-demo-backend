@@ -140,7 +140,7 @@ async function submitLeaveRequest(schoolId, staffId, data) {
     admin._id, 'leave_status', 'New Leave Request',
     `${staff.firstName} ${staff.lastName} has submitted a ${data.leaveType} leave request for `
       + `${data.startDate.toDateString()} to ${data.endDate.toDateString()} (${totalDays} days).`,
-    { schoolId, leaveRequestId: request._id }, ['inApp'],
+    { schoolId, leaveRequestId: request._id },
   )));
 
   await AuditLog.record({
@@ -165,7 +165,7 @@ async function reviewLeaveRequest(schoolId, requestId, status, reviewNote, admin
   await sendNotification(
     request.staff, 'leave_status', `Leave Request ${status === 'approved' ? 'Approved' : 'Rejected'}`,
     `Your ${request.leaveType} leave request has been ${status}.${reviewNote ? ` Note: ${reviewNote}` : ''}`,
-    { schoolId, leaveRequestId: request._id }, ['inApp'],
+    { schoolId, leaveRequestId: request._id },
   );
 
   await AuditLog.record({

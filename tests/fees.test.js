@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 const School = require('../src/models/School');
 const AcademicTerm = require('../src/models/AcademicTerm');
 const Class = require('../src/models/Class');
@@ -6,6 +7,8 @@ const Student = require('../src/models/Student');
 const User = require('../src/models/User');
 const AuditLog = require('../src/models/AuditLog');
 const Notification = require('../src/models/Notification');
+const FeeInvoice = require('../src/models/FeeInvoice');
+const FeePayment = require('../src/models/FeePayment');
 const feesService = require('../src/modules/fees/fees.service');
 
 describe('Fees service', () => {
@@ -101,5 +104,39 @@ describe('Fees service', () => {
     await expect(
       feesService.getStudentFeeStatement(school._id, student._id, term._id, otherParent._id, 'parent'),
     ).rejects.toThrow();
+  });
+
+  test('handlePaystackFeeWebhook verifies the signature against the raw bytes, not the parsed body', async () => {
+    const { school, term, admin, student } = await makeFixture();
+    const structure = await feesService.createFeeStructure(school._id, {
+      term: term._id, name: 'Tuition', amount: 15000, dueDate: new Date('2025-10-01'),
+    }, admin._id);
+    await feesService.generateInvoices(school._id, term._id, admin._id);
+    const { invoices } = await feesService.getFeeInvoices(school._id, { term: term._id });
+    const invoice = invoices.find((inv) => String(inv.student._id) === String(student._id));
+
+    const payment = await FeePayment.create({
+      school: school._id, invoice: invoice._id, student: student._id, amount: 15000,
+      paymentMethod: 'paystack', paystackRef: 'ref-123', paystackStatus: 'pending',
+    });
+
+    const rawBody = Buffer.from(JSON.stringify({ event: 'charge.success', data: { reference: 'ref-123' } }));
+    const validSignature = crypto.createHmac('sha512', process.env.PAYSTACK_SECRET_KEY).update(rawBody).digest('hex');
+
+    await feesService.handlePaystackFeeWebhook(rawBody, JSON.parse(rawBody.toString()), validSignature);
+
+    expect((await FeePayment.findById(payment._id)).paystackStatus).toBe('success');
+    expect((await FeeInvoice.findById(invoice._id)).status).toBe('paid');
+  });
+
+  test('handlePaystackFeeWebhook rejects a signature that does not match the raw request bytes', async () => {
+    const rawBody = Buffer.from(JSON.stringify({ event: 'charge.success', data: { reference: 'ref-456' } }));
+    const signatureForADifferentBody = crypto.createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
+      .update(Buffer.from('{"event":"charge.success","data":{"reference":"ref-456"}} '))
+      .digest('hex');
+
+    await expect(
+      feesService.handlePaystackFeeWebhook(rawBody, JSON.parse(rawBody.toString()), signatureForADifferentBody),
+    ).rejects.toThrow('Invalid Paystack signature.');
   });
 });

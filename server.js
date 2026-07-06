@@ -105,7 +105,13 @@ if (process.env.NODE_ENV !== 'development') {
 // ========================
 // Body Parsing Middleware
 // ========================
-app.use(express.json({ limit: '10mb' }));
+// Captures the exact raw bytes alongside the parsed body — needed because Paystack
+// signs the raw request it sent, and JSON.stringify(req.body) can differ from that
+// (key order, whitespace, number formatting) once Express has re-serialized it.
+app.use(express.json({
+  limit: '10mb',
+  verify: (req, res, buf) => { req.rawBody = buf; },
+}));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 

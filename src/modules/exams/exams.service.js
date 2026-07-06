@@ -44,7 +44,7 @@ async function notifyForExam(schoolId, exam, title, body) {
 
   const uniqueRecipients = [...new Set(recipients.map(String))];
   await Promise.all(uniqueRecipients.map((id) => sendNotification(
-    id, 'exam_reminder', title, body, { schoolId, examId: exam._id }, ['inApp'],
+    id, 'exam_reminder', title, body, { schoolId, examId: exam._id },
   )));
 }
 

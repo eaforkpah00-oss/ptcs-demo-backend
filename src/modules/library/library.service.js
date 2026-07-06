@@ -10,7 +10,7 @@ const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 async function notifyParents(student, schoolId, title, body, data = {}) {
   await Promise.all((student.parents || []).map((parentId) => sendNotification(
-    parentId, 'library_overdue', title, body, { schoolId, ...data }, ['inApp'],
+    parentId, 'library_overdue', title, body, { schoolId, ...data },
   )));
 }
 
