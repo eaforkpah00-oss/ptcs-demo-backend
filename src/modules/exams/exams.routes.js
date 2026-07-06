@@ -1,7 +1,7 @@
 const express = require('express');
 const { protect, restrictTo } = require('../../middleware/auth');
 const { attachTenant } = require('../../middleware/tenant');
-const { validate } = require('../../middleware/validate');
+const { validate, validateQuery } = require('../../middleware/validate');
 const examsValidation = require('./exams.validation');
 const examsController = require('./exams.controller');
 
@@ -18,6 +18,7 @@ router.post(
 router.get(
   '/schedule/:termId',
   restrictTo('school_admin', 'teacher', 'parent'),
+  validateQuery(examsValidation.getExamSchedule),
   examsController.getExamSchedule,
 );
 

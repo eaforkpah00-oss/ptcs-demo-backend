@@ -28,15 +28,14 @@ const updatePeriod = z.object({
   room: z.string().optional().nullable(),
 });
 
-const getTimetable = z.object({
-  class: objectId,
+// class/teacher come from the route's :classId/:teacherId path params, not the
+// query string — only `term` is ever actually read from req.query by the controller.
+const termQuery = z.object({
   term: objectId,
 });
 
-const getTeacherTimetable = z.object({
-  teacher: objectId,
-  term: objectId,
-});
+const getTimetable = termQuery;
+const getTeacherTimetable = termQuery;
 
 module.exports = {
   createPeriod,

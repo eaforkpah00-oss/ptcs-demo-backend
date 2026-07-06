@@ -37,8 +37,9 @@ const updateExam = z.object({
   instructions: z.string().optional().nullable(),
 });
 
+// term comes from the route's :termId path param, not the query string —
+// only `class` is ever actually read from req.query by the controller.
 const getExamSchedule = z.object({
-  term: objectId,
   class: objectId.optional(),
 });
 

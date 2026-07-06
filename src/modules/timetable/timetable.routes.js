@@ -1,7 +1,7 @@
 const express = require('express');
 const { protect, restrictTo } = require('../../middleware/auth');
 const { attachTenant } = require('../../middleware/tenant');
-const { validate } = require('../../middleware/validate');
+const { validate, validateQuery } = require('../../middleware/validate');
 const timetableValidation = require('./timetable.validation');
 const timetableController = require('./timetable.controller');
 
@@ -26,11 +26,13 @@ router.delete('/periods/:id', restrictTo('school_admin'), timetableController.de
 router.get(
   '/class/:classId',
   restrictTo('school_admin', 'teacher', 'parent'),
+  validateQuery(timetableValidation.getTimetable),
   timetableController.getClassTimetable,
 );
 router.get(
   '/teacher/:teacherId',
   restrictTo('school_admin', 'teacher'),
+  validateQuery(timetableValidation.getTeacherTimetable),
   timetableController.getTeacherTimetable,
 );
 router.get('/conflicts/:termId', restrictTo('school_admin'), timetableController.detectConflicts);

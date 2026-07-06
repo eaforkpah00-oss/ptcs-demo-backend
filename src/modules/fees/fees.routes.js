@@ -1,7 +1,7 @@
 const express = require('express');
 const { protect, restrictTo } = require('../../middleware/auth');
 const { attachTenant } = require('../../middleware/tenant');
-const { validate } = require('../../middleware/validate');
+const { validate, validateQuery } = require('../../middleware/validate');
 const feesValidation = require('./fees.validation');
 const feesController = require('./fees.controller');
 
@@ -33,7 +33,12 @@ router.post(
   validate(feesValidation.generateInvoices),
   feesController.generateInvoices,
 );
-router.get('/invoices', restrictTo('school_admin'), feesController.getFeeInvoices);
+router.get(
+  '/invoices',
+  restrictTo('school_admin'),
+  validateQuery(feesValidation.getFeeInvoices),
+  feesController.getFeeInvoices,
+);
 router.get(
   '/invoices/student/:studentId',
   restrictTo('school_admin', 'parent'),
