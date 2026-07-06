@@ -39,6 +39,7 @@ const calendarRoutes = require('./src/modules/calendar/calendar.routes');
 const hrRoutes = require('./src/modules/hr/hr.routes');
 const analyticsRoutes = require('./src/modules/analytics/analytics.routes');
 const parentPortalRoutes = require('./src/modules/parentPortal/parentPortal.routes');
+const { registerSmsJobs } = require('./src/jobs/smsJobs');
 
 // Ensure uploads directory exists
 const uploadPath = process.env.UPLOAD_PATH || 'uploads/';
@@ -185,6 +186,7 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     await connectDB();
+    registerSmsJobs();
 
     const server = app.listen(PORT, () => {
       console.log(`\n========================================`);
