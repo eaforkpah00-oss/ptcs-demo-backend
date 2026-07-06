@@ -7,9 +7,10 @@ exports.getAllEvents = catchAsync(async (req, res) => {
   const limit = parseInt(req.query.limit) || 20;
   const skip = (page - 1) * limit;
   const schoolFilter = req.user.role === 'super_admin' ? {} : { school: req.user.school?._id || req.user.school };
+  const filter = { ...schoolFilter, isDeleted: { $ne: true } };
   const [events, total] = await Promise.all([
-    Event.find(schoolFilter).populate('organizer', 'firstName lastName').sort('-startDate').skip(skip).limit(limit),
-    Event.countDocuments(schoolFilter),
+    Event.find(filter).populate('organizer', 'firstName lastName').sort('-startDate').skip(skip).limit(limit),
+    Event.countDocuments(filter),
   ]);
   res.status(200).json({ status: 'success', results: events.length, total, data: events });
 });
@@ -40,7 +41,8 @@ exports.deleteEvent = catchAsync(async (req, res, next) => {
 
 exports.getUpcomingEvents = catchAsync(async (req, res) => {
   const schoolFilter = req.user.role === 'super_admin' ? {} : { school: req.user.school?._id || req.user.school };
-  const events = await Event.find({ ...schoolFilter, startDate: { $gte: new Date() }, status: 'upcoming' })
-    .sort('startDate').limit(10);
+  const events = await Event.find({
+    ...schoolFilter, startDate: { $gte: new Date() }, status: 'upcoming', isDeleted: { $ne: true },
+  }).sort('startDate').limit(10);
   res.status(200).json({ status: 'success', results: events.length, data: events });
 });

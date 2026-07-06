@@ -35,6 +35,7 @@ const feesRoutes = require('./src/modules/fees/fees.routes');
 const timetableRoutes = require('./src/modules/timetable/timetable.routes');
 const examsRoutes = require('./src/modules/exams/exams.routes');
 const libraryRoutes = require('./src/modules/library/library.routes');
+const calendarRoutes = require('./src/modules/calendar/calendar.routes');
 
 // Ensure uploads directory exists
 const uploadPath = process.env.UPLOAD_PATH || 'uploads/';
@@ -156,6 +157,7 @@ app.use('/api/v1/fees', feesRoutes);
 app.use('/api/v1/timetable', timetableRoutes);
 app.use('/api/v1/exams', examsRoutes);
 app.use('/api/v1/library', libraryRoutes);
+app.use('/api/v1/calendar', calendarRoutes);
 
 // ========================
 // 404 Handler
