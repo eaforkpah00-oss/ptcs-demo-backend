@@ -1,7 +1,6 @@
 const catchAsync = require('../../utils/catchAsync');
 const ApiResponse = require('../../utils/apiResponse');
 const parentPortalService = require('./parentPortal.service');
-const timetableService = require('../timetable/timetable.service');
 const calendarService = require('../calendar/calendar.service');
 
 exports.getChildDashboard = catchAsync(async (req, res) => {
@@ -37,7 +36,9 @@ exports.initiateChildFeePayment = catchAsync(async (req, res) => {
 });
 
 exports.getClassTimetable = catchAsync(async (req, res) => {
-  const timetable = await timetableService.getClassTimetable(req.schoolId, req.params.classId, req.query.term);
+  const timetable = await parentPortalService.getChildClassTimetable(
+    req.user._id, req.params.classId, req.schoolId, req.query.term,
+  );
   return ApiResponse.success(res, timetable, 'Class timetable retrieved.');
 });
 

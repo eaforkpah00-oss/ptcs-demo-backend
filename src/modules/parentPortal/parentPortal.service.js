@@ -12,6 +12,7 @@ const AuditLog = require('../../models/AuditLog');
 const AppError = require('../../utils/appError');
 const feesService = require('../fees/fees.service');
 const libraryService = require('../library/library.service');
+const timetableService = require('../timetable/timetable.service');
 
 const PRESENT_STATUSES = ['present', 'tardy'];
 const DEFAULT_GRADING_SCALE = [
@@ -156,6 +157,15 @@ async function getChildAttendance(parentId, studentId, schoolId, { startDate, en
   return { records, total, ...attendanceSummary(await Attendance.find(filter)) };
 }
 
+async function getChildClassTimetable(parentId, classId, schoolId, termId) {
+  const hasChildInClass = await Student.exists({
+    parents: parentId, school: schoolId, class: classId, isActive: true,
+  });
+  if (!hasChildInClass) throw new AppError('You are not authorized to view this class.', 403);
+
+  return timetableService.getClassTimetable(schoolId, classId, termId);
+}
+
 async function getChildFeeStatement(parentId, studentId, termId, schoolId) {
   return feesService.getStudentFeeStatement(schoolId, studentId, termId, parentId, 'parent');
 }
@@ -201,6 +211,7 @@ module.exports = {
   getChildDashboard,
   getChildFullReport,
   getChildAttendance,
+  getChildClassTimetable,
   getChildFeeStatement,
   initiateChildFeePayment,
   getChildBorrowHistory,

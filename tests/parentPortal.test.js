@@ -89,6 +89,20 @@ describe('Parent portal service', () => {
     ).rejects.toThrow("You are not authorized to view this student's library history.");
   });
 
+  test('a parent cannot view the timetable for a class none of their children are in', async () => {
+    const { school, parent, klass } = await makeFixture();
+    const otherClass = await Class.create({ name: 'Class 2', school: school._id });
+
+    await expect(
+      parentPortalService.getChildClassTimetable(parent._id, otherClass._id, school._id),
+    ).rejects.toThrow('You are not authorized to view this class.');
+
+    // Sanity check: the parent's own child's class is still viewable.
+    await expect(
+      parentPortalService.getChildClassTimetable(parent._id, klass._id, school._id),
+    ).resolves.toBeDefined();
+  });
+
   test('getChildDashboard returns a summary for every linked child with attendance, fees, and books', async () => {
     const {
       school, term, klass, teacher, admin, parent, child,
