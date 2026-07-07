@@ -40,6 +40,7 @@ const hrRoutes = require('./src/modules/hr/hr.routes');
 const analyticsRoutes = require('./src/modules/analytics/analytics.routes');
 const parentPortalRoutes = require('./src/modules/parentPortal/parentPortal.routes');
 const termsRoutes = require('./src/modules/terms/terms.routes');
+const subjectsRoutes = require('./src/modules/subjects/subjects.routes');
 const { registerSmsJobs } = require('./src/jobs/smsJobs');
 
 // Ensure uploads directory exists
@@ -173,6 +174,7 @@ app.use('/api/v1/hr', hrRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/parent', parentPortalRoutes);
 app.use('/api/v1/terms', termsRoutes);
+app.use('/api/v1/subjects', subjectsRoutes);
 
 // ========================
 // 404 Handler
