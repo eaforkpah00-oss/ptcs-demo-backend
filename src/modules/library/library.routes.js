@@ -47,5 +47,6 @@ router.get(
   libraryController.getStudentHistory,
 );
 router.get('/overdue', restrictTo('school_admin'), libraryController.getOverdueList);
+router.get('/borrowed', restrictTo('school_admin'), libraryController.getBorrowedList);
 
 module.exports = router;

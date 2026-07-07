@@ -114,4 +114,17 @@ describe('Library service', () => {
       libraryService.getStudentBorrowHistory(school._id, student._id, otherParent._id, 'parent'),
     ).rejects.toThrow('You are not authorized to view this student\'s library history.');
   });
+
+  test('getBorrowedList returns only currently-borrowed records, excluding returned and overdue ones', async () => {
+    const { school, student, admin } = await makeFixture();
+    const book1 = await libraryService.addBook(school._id, { title: 'Book F', totalCopies: 1 }, admin._id);
+    const book2 = await libraryService.addBook(school._id, { title: 'Book G', totalCopies: 1 }, admin._id);
+    const borrowed = await libraryService.borrowBook(school._id, book1._id, student._id, admin._id);
+    const toReturn = await libraryService.borrowBook(school._id, book2._id, student._id, admin._id);
+    await libraryService.returnBook(school._id, toReturn._id, admin._id);
+
+    const list = await libraryService.getBorrowedList(school._id);
+    expect(list).toHaveLength(1);
+    expect(list[0]._id.toString()).toBe(String(borrowed._id));
+  });
 });

@@ -210,6 +210,12 @@ async function getOverdueList(schoolId) {
     .populate('book', 'title');
 }
 
+async function getBorrowedList(schoolId) {
+  return BorrowRecord.find({ school: schoolId, status: 'borrowed', isDeleted: false })
+    .populate('student', 'firstName lastName class')
+    .populate('book', 'title');
+}
+
 module.exports = {
   addBook,
   updateBook,
@@ -220,4 +226,5 @@ module.exports = {
   getStudentBorrowHistory,
   searchBooks,
   getOverdueList,
+  getBorrowedList,
 };

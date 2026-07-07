@@ -44,3 +44,8 @@ exports.getOverdueList = catchAsync(async (req, res) => {
   const list = await libraryService.getOverdueList(req.schoolId);
   return ApiResponse.success(res, list, 'Overdue list retrieved.');
 });
+
+exports.getBorrowedList = catchAsync(async (req, res) => {
+  const list = await libraryService.getBorrowedList(req.schoolId);
+  return ApiResponse.success(res, list, 'Borrowed list retrieved.');
+});
