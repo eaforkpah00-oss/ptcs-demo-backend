@@ -1,5 +1,9 @@
 const School = require('../src/models/School');
 const User = require('../src/models/User');
+const Class = require('../src/models/Class');
+const Subject = require('../src/models/Subject');
+const AcademicTerm = require('../src/models/AcademicTerm');
+const Timetable = require('../src/models/Timetable');
 const StaffProfile = require('../src/models/StaffProfile');
 const LeaveRequest = require('../src/models/LeaveRequest');
 const AuditLog = require('../src/models/AuditLog');
@@ -127,5 +131,41 @@ describe('HR service', () => {
     expect(summary.rows[0].grossSalary).toBe(500000);
     expect(summary.rows[0].leaveDays).toBe(3);
     expect(summary.totals.grossSalary).toBe(500000);
+  });
+
+  test('getTeachingLoad reports homeroom class, distinct classes, and distinct subjects per teacher', async () => {
+    const { school, teacher, otherTeacher, admin } = await makeFixture();
+    const term = await AcademicTerm.create({
+      school: school._id, name: 'Term 1', academicYear: '2025/2026',
+      startDate: new Date('2025-09-01'), endDate: new Date('2025-12-01'), isCurrent: true,
+    });
+    const homeroomClass = await Class.create({ name: 'Class 1', school: school._id, teacher: teacher._id });
+    const otherClass = await Class.create({ name: 'Class 2', school: school._id });
+    const math = await Subject.create({ school: school._id, name: 'Mathematics' });
+    const english = await Subject.create({ school: school._id, name: 'English' });
+
+    // Teacher teaches Mathematics in their own homeroom class and English in another class.
+    await Timetable.create({
+      school: school._id, class: homeroomClass._id, term: term._id, dayOfWeek: 'monday', periodNumber: 1,
+      startTime: '08:00', endTime: '08:45', subject: math._id, teacher: teacher._id, createdBy: admin._id,
+    });
+    await Timetable.create({
+      school: school._id, class: otherClass._id, term: term._id, dayOfWeek: 'tuesday', periodNumber: 1,
+      startTime: '08:00', endTime: '08:45', subject: english._id, teacher: teacher._id, createdBy: admin._id,
+    });
+    // otherTeacher has no homeroom and no timetable periods at all.
+
+    const load = await hrService.getTeachingLoad(school._id);
+    expect(load).toHaveLength(2);
+
+    const teacherLoad = load.find((l) => String(l.teacher._id) === String(teacher._id));
+    expect(teacherLoad.homeroomClasses).toEqual([{ _id: homeroomClass._id, name: 'Class 1' }]);
+    expect(teacherLoad.classesTaught.map((c) => c.name).sort()).toEqual(['Class 1', 'Class 2']);
+    expect(teacherLoad.subjectsTaught.map((s) => s.name).sort()).toEqual(['English', 'Mathematics']);
+
+    const otherTeacherLoad = load.find((l) => String(l.teacher._id) === String(otherTeacher._id));
+    expect(otherTeacherLoad.homeroomClasses).toEqual([]);
+    expect(otherTeacherLoad.classesTaught).toEqual([]);
+    expect(otherTeacherLoad.subjectsTaught).toEqual([]);
   });
 });

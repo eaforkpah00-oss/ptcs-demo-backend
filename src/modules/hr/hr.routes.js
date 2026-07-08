@@ -46,4 +46,6 @@ router.get(
   hrController.getPayrollSummary,
 );
 
+router.get('/teachers/workload', restrictTo('school_admin'), hrController.getTeachingLoad);
+
 module.exports = router;

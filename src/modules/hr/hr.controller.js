@@ -48,3 +48,8 @@ exports.getPayrollSummary = catchAsync(async (req, res) => {
   const summary = await hrService.getPayrollSummary(req.schoolId, Number(req.query.month), Number(req.query.year));
   return ApiResponse.success(res, summary, 'Payroll summary retrieved.');
 });
+
+exports.getTeachingLoad = catchAsync(async (req, res) => {
+  const load = await hrService.getTeachingLoad(req.schoolId);
+  return ApiResponse.success(res, load, 'Teaching load retrieved.');
+});

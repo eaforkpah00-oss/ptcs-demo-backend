@@ -2,6 +2,8 @@ const StaffProfile = require('../../models/StaffProfile');
 const LeaveRequest = require('../../models/LeaveRequest');
 const User = require('../../models/User');
 const School = require('../../models/School');
+const Class = require('../../models/Class');
+const Timetable = require('../../models/Timetable');
 const AuditLog = require('../../models/AuditLog');
 const AppError = require('../../utils/appError');
 const { encrypt, decrypt } = require('../../utils/encryption');
@@ -226,6 +228,46 @@ async function getPayrollSummary(schoolId, month, year) {
   };
 }
 
+// Derives each teacher's homeroom class(es) and teaching load (distinct classes/
+// subjects) from Class.teacher and Timetable — User.subjectsTaught exists on the
+// schema but nothing anywhere populates it, so it isn't a reliable source.
+async function getTeachingLoad(schoolId) {
+  const teachers = await User.find({ school: schoolId, role: 'teacher', isActive: true })
+    .select('firstName lastName email')
+    .sort('firstName');
+  const teacherIds = teachers.map((t) => t._id);
+
+  const [homeroomClasses, periods] = await Promise.all([
+    Class.find({ school: schoolId, teacher: { $in: teacherIds }, isActive: true }).select('name teacher'),
+    Timetable.find({ school: schoolId, teacher: { $in: teacherIds }, isDeleted: false })
+      .populate('class', 'name')
+      .populate('subject', 'name'),
+  ]);
+
+  return teachers.map((teacher) => {
+    const homerooms = homeroomClasses
+      .filter((c) => String(c.teacher) === String(teacher._id))
+      .map((c) => ({ _id: c._id, name: c.name }));
+
+    const teacherPeriods = periods.filter((p) => String(p.teacher) === String(teacher._id));
+    const classMap = new Map();
+    const subjectMap = new Map();
+    teacherPeriods.forEach((p) => {
+      if (p.class) classMap.set(String(p.class._id), p.class.name);
+      if (p.subject) subjectMap.set(String(p.subject._id), p.subject.name);
+    });
+
+    return {
+      teacher: {
+        _id: teacher._id, firstName: teacher.firstName, lastName: teacher.lastName, email: teacher.email,
+      },
+      homeroomClasses: homerooms,
+      classesTaught: Array.from(classMap, ([_id, name]) => ({ _id, name })),
+      subjectsTaught: Array.from(subjectMap, ([_id, name]) => ({ _id, name })),
+    };
+  });
+}
+
 module.exports = {
   getNextEmployeeId,
   createStaffProfile,
@@ -237,4 +279,5 @@ module.exports = {
   getAllLeaveRequests,
   getMyLeaveRequests,
   getPayrollSummary,
+  getTeachingLoad,
 };
